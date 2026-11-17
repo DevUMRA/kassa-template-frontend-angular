@@ -1,0 +1,24 @@
+# pre-commit (https://pre-commit.com): `pip install pre-commit && pre-commit install`
+# Алдымен `npm ci` орындаңыз — хуктер жергілікті node_modules-ті қолданады.
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-json
+      - id: check-merge-conflict
+      - id: detect-private-key
+  - repo: local
+    hooks:
+      - id: prettier
+        name: prettier
+        entry: npx prettier --check
+        language: system
+        files: ^src/.*\.(ts|html|css)$
+      - id: eslint
+        name: eslint
+        entry: npx eslint
+        language: system
+        files: ^src/.*\.(ts|html)$
