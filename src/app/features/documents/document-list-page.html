@@ -1,0 +1,95 @@
+<div class="stack">
+  <section class="card stack">
+    <h2>Құжаттар</h2>
+    <div class="row" [formGroup]="form">
+      <label
+        >Түрі
+        <select formControlName="doc_type" aria-label="Түрі">
+          <option value="">Барлығы</option>
+          @for (option of docTypes; track option[0]) {
+            <option [value]="option[0]">{{ option[1] }}</option>
+          }
+        </select>
+      </label>
+      <label
+        >Мәртебесі
+        <select formControlName="status" aria-label="Мәртебесі">
+          <option value="">Барлығы</option>
+          @for (option of statuses; track option[0]) {
+            <option [value]="option[0]">{{ option[1] }}</option>
+          }
+        </select>
+      </label>
+      <label
+        >Нөмірі
+        <input
+          formControlName="search"
+          placeholder="мыс. SAL-000034"
+          autocomplete="off"
+          (keydown.enter)="showFirstPage()"
+        />
+      </label>
+      <label>Басы <input type="date" formControlName="date_from" /></label>
+      <label>Соңы <input type="date" formControlName="date_to" /></label>
+      <button
+        class="btn btn-primary"
+        type="button"
+        [disabled]="showBusy.active()"
+        (click)="showFirstPage()"
+      >
+        Көрсету
+      </button>
+    </div>
+  </section>
+  <section class="card">
+    <div class="stack">
+      @if (errors(); as messages) {
+        <app-alert-box [messages]="messages" />
+      }
+      @if (page(); as data) {
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Нөмірі</th>
+                <th>Күні</th>
+                <th>Түрі</th>
+                <th>Мәртебесі</th>
+                <th>Қойма</th>
+                <th>Жауапты</th>
+                <th class="num">Сомасы</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (doc of data.results; track doc.id) {
+                <tr class="clickable" tabindex="0" (click)="open(doc)" (keydown.enter)="open(doc)">
+                  <td>{{ doc.number }}</td>
+                  <td>{{ doc.date | dateTime }}</td>
+                  <td>{{ doc.doc_type_display }}</td>
+                  <td><app-status-badge [status]="doc.status" /></td>
+                  <td>{{ doc.warehouse }}</td>
+                  <td>{{ doc.responsible }}</td>
+                  <td class="num">{{ doc.total | money }}</td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td class="empty" colspan="7">Деректер жоқ</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        <div class="row">
+          <span class="muted">Барлығы: {{ data.count }}</span>
+          <span class="spacer"></span>
+          <button class="btn" type="button" [disabled]="!data.previous" (click)="showPage(-1)">
+            ← Алдыңғы
+          </button>
+          <button class="btn" type="button" [disabled]="!data.next" (click)="showPage(1)">
+            Келесі →
+          </button>
+        </div>
+      }
+    </div>
+  </section>
+</div>

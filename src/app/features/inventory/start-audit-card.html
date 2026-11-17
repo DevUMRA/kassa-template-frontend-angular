@@ -1,0 +1,65 @@
+@if (warehouseName(); as warehouse) {
+  <section class="card stack">
+    <h2>Жаңа түгендеу · {{ warehouse }}</h2>
+    <p class="muted">
+      Басталған сәттен бастап таңдалған тауарлар бойынша сату, қабылдау және басқа қозғалыстар
+      бекітілгенше тоқтайды.
+    </p>
+    <app-product-search
+      placeholder="Түгенделетін тауарды іздеу"
+      [clearOnSelect]="false"
+      (selected)="select($event)"
+    />
+    <div class="muted">
+      @if (selected().length) {
+        Таңдалды:
+        @for (product of selected(); track product.id) {
+          <span class="badge"
+            >{{ product.name }}
+            <button
+              class="btn-icon"
+              type="button"
+              [attr.aria-label]="product.name + ' алып тастау'"
+              (click)="unselect(product)"
+            >
+              ✕
+            </button>
+          </span>
+        }
+      } @else {
+        Тауар таңдалмаған.
+      }
+    </div>
+    <div class="row">
+      <label class="grow"
+        >Себебі (міндетті емес)
+        <input
+          [formControl]="comment"
+          maxlength="500"
+          placeholder="Мысалы: жоспарлы, ауысым тапсыру"
+          autocomplete="off"
+        />
+      </label>
+    </div>
+    <div class="row">
+      <button
+        class="btn btn-primary"
+        type="button"
+        [disabled]="selected().length === 0 || selectedBusy.active()"
+        (click)="startSelected()"
+      >
+        Таңдалғандарды түгендеу
+      </button>
+      <button class="btn" type="button" [disabled]="allBusy.active()" (click)="startAll()">
+        Барлық тауарды түгендеу
+      </button>
+    </div>
+    @if (errors(); as messages) {
+      <app-alert-box [messages]="messages" />
+    }
+  </section>
+} @else {
+  <section class="card">
+    <app-alert-box kind="info" messages="Түгендеуді бастау үшін сізге қойма бекітілуі керек." />
+  </section>
+}

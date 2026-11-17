@@ -1,0 +1,89 @@
+<section class="card stack">
+  <h2>Есептер</h2>
+  <div class="row" [formGroup]="form">
+    <label
+      >Есеп
+      <select formControlName="report" aria-label="Есеп" (change)="changeReport()">
+        @for (r of available(); track r.key) {
+          <option [value]="r.key">{{ r.title }}</option>
+        }
+      </select>
+    </label>
+    @if (selectedDefinition()?.period) {
+      <label>Басы <input type="date" formControlName="date_from" /></label>
+      <label>Соңы <input type="date" formControlName="date_to" /></label>
+    }
+    @if (isManager()) {
+      <label
+        >Қойма
+        <select formControlName="warehouse">
+          <option value="">Барлық қойма</option>
+          @for (w of warehouses(); track w.id) {
+            <option [value]="w.id">{{ w.name }}</option>
+          }
+        </select>
+      </label>
+    }
+    @if (selected() === 'sales') {
+      <label
+        >Топтау
+        <select formControlName="group_by">
+          <option value="day">Күн</option>
+          <option value="product">Тауар</option>
+          <option value="cashier">Кассир</option>
+        </select>
+      </label>
+    }
+    @if (selected() === 'stock') {
+      <label
+        >Іздеу <input formControlName="search" placeholder="Атауы / артикулы / штрихкоды"
+      /></label>
+      <label
+        >Қалдық ≤
+        <input
+          class="qty"
+          type="number"
+          min="0"
+          step="any"
+          placeholder="мыс. 10"
+          formControlName="low"
+        />
+      </label>
+    }
+    <button
+      class="btn btn-primary"
+      type="button"
+      [disabled]="showBusy.active()"
+      (click)="showReport()"
+    >
+      Көрсету
+    </button>
+    <button class="btn" type="button" [disabled]="!result()" (click)="exportCsv()">
+      CSV жүктеу
+    </button>
+  </div>
+</section>
+<div #output class="stack report-output">
+  @if (errors(); as messages) {
+    <app-alert-box [messages]="messages" />
+  }
+  @if (result(); as r) {
+    @switch (r.key) {
+      @case ('stock') {
+        <app-stock-report [data]="r.data" />
+      }
+      @case ('turnover') {
+        <app-turnover-report [data]="r.data" />
+      }
+      @case ('sales') {
+        <app-sales-report [data]="r.data" />
+      }
+      @case ('inventory') {
+        <app-inventory-report [data]="r.data" />
+      }
+      @case ('movements') {
+        <app-movements-report [data]="r.data" (pageChange)="show($event)" />
+      }
+    }
+  }
+</div>

@@ -1,0 +1,136 @@
+<div class="stack">
+  <p>{{ summary() }}</p>
+  <h3>Түгендеулер</h3>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Түгендеу</th>
+          <th>Бекітілді</th>
+          <th>Қойма</th>
+          <th>Түсініктеме</th>
+          <th class="num">Кемшілік</th>
+          <th class="num">Артық</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (audit of data().audits; track audit.id) {
+          <tr>
+            <td>{{ audit.number }}</td>
+            <td>{{ audit.posted_at | dateTime }}</td>
+            <td>{{ audit.warehouse }}</td>
+            <td>{{ audit.comment || '—' }}</td>
+            <td class="num neg">{{ audit.shortage_amount | money }}</td>
+            <td class="num pos">{{ audit.surplus_amount | money }}</td>
+          </tr>
+        } @empty {
+          <tr>
+            <td class="empty" colspan="6">Деректер жоқ</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  <h3>Айырмасы бар тауарлар</h3>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Түгендеу</th>
+          <th>Бекітілді</th>
+          <th>Қойма</th>
+          <th>Тауар</th>
+          <th class="num">Айырма</th>
+          <th class="num">Бағасы</th>
+          <th class="num">Сомасы</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of lines(); track $index) {
+          <tr>
+            <td>{{ row.audit.number }}</td>
+            <td>{{ row.audit.posted_at | dateTime }}</td>
+            <td>{{ row.audit.warehouse }}</td>
+            <td>{{ row.line.product_name }}</td>
+            <td [class]="signClass(row.line.difference)">{{ row.line.difference | qty }}</td>
+            <td class="num">{{ row.line.price | money }}</td>
+            <td [class]="signClass(row.line.amount)">{{ row.line.amount | money }}</td>
+          </tr>
+        } @empty {
+          <tr>
+            <td class="empty" colspan="7">Деректер жоқ</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  <h3>Есептен шығарулар</h3>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Тауар</th>
+          <th>Артикул</th>
+          <th class="num">Құжат</th>
+          <th class="num">Саны</th>
+          <th class="num">Сомасы</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (r of data().write_offs.rows; track $index) {
+          <tr>
+            <td>{{ r.product_name }}</td>
+            <td>{{ r.sku }}</td>
+            <td class="num">{{ r.documents }}</td>
+            <td class="num">{{ r.quantity | qty }}</td>
+            <td class="num">{{ r.amount | money }}</td>
+          </tr>
+        } @empty {
+          <tr>
+            <td class="empty" colspan="5">Деректер жоқ</td>
+          </tr>
+        }
+      </tbody>
+      <tfoot>
+        <tr>
+          <td>Барлығы</td>
+          <td></td>
+          <td></td>
+          <td class="num">{{ data().write_offs.total_quantity | qty }}</td>
+          <td class="num">{{ data().write_offs.total_amount | money }}</td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+  <h3>Есептен шығару құжаттары</h3>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Құжат</th>
+          <th>Өткізілді</th>
+          <th>Қойма</th>
+          <th>Себебі</th>
+          <th class="num">Саны</th>
+          <th class="num">Сомасы</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (d of data().write_offs.documents; track d.id) {
+          <tr>
+            <td>{{ d.number }}</td>
+            <td>{{ d.posted_at | dateTime }}</td>
+            <td>{{ d.warehouse }}</td>
+            <td>{{ d.reason || '—' }}</td>
+            <td class="num">{{ d.quantity | qty }}</td>
+            <td class="num">{{ d.amount | money }}</td>
+          </tr>
+        } @empty {
+          <tr>
+            <td class="empty" colspan="6">Деректер жоқ</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>

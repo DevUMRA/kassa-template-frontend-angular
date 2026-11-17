@@ -1,0 +1,117 @@
+@if (loadErrors(); as errors) {
+  <app-alert-box [messages]="errors" />
+} @else if (document(); as doc) {
+  <section class="card stack">
+    <div class="row">
+      <a class="btn-link" routerLink="/documents">← Тізім</a>
+      <h2 class="title-inline">{{ doc.doc_type_display }} №{{ doc.number }}</h2>
+      <app-status-badge [status]="doc.status" />
+    </div>
+    <div class="stack">
+      @if (doc.warehouse) {
+        <div><span class="muted">Қойма: </span>{{ doc.warehouse }}</div>
+      }
+      @if (doc.supplier) {
+        <div><span class="muted">Жеткізуші: </span>{{ doc.supplier }}</div>
+      }
+      @if (doc.responsible) {
+        <div><span class="muted">Жауапты: </span>{{ doc.responsible }}</div>
+      }
+      <div><span class="muted">Жасалды: </span>{{ doc.date | dateTime }}</div>
+      @if (doc.posted_at) {
+        <div><span class="muted">Өткізілді: </span>{{ doc.posted_at | dateTime }}</div>
+      }
+      @if (doc.comment) {
+        <div><span class="muted">Түсініктеме: </span>{{ doc.comment }}</div>
+      }
+      @if (doc.base_document; as base) {
+        <div>
+          <span class="muted">Негіз құжат: </span>
+          <a class="btn-link" [routerLink]="['/documents', base.id]">№{{ base.number }}</a>
+        </div>
+      }
+      @if (doc.returns.length) {
+        <div>
+          <span class="muted">Қайтарулар: </span>
+          @for (r of doc.returns; track r.id) {
+            <a class="btn-link" [routerLink]="['/documents', r.id]">№{{ r.number }}</a>
+            ({{ statusTitle(r.status) }})
+          }
+        </div>
+      }
+    </div>
+    @if (canceledInfo(); as info) {
+      <app-alert-box kind="info" [messages]="info" />
+    }
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Тауар</th>
+            <th class="num">Саны</th>
+            <th class="num">Бағасы</th>
+            <th class="num">Сомасы</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of doc.items; track item.product_id) {
+            <tr>
+              <td>{{ item.product_name }}</td>
+              <td class="num">{{ item.quantity | qty }}</td>
+              <td class="num">{{ item.price | money }}</td>
+              <td class="num">{{ item.total | money }}</td>
+            </tr>
+          } @empty {
+            <tr>
+              <td class="empty" colspan="4">Деректер жоқ</td>
+            </tr>
+          }
+        </tbody>
+        <tfoot>
+          <tr>
+            <td>Жиыны</td>
+            <td></td>
+            <td></td>
+            <td class="num">{{ doc.total | money }}</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+    @if (doc.status !== 'CANCELED' && hasPostedReturns()) {
+      <app-alert-box
+        kind="info"
+        messages="Бұл құжаттың өткізілген қайтарулары бар — алдымен солардың күшін жойыңыз."
+      />
+    }
+    @if (doc.status !== 'CANCELED') {
+      <div class="row">
+        <input
+          #reasonInput
+          class="grow"
+          [formControl]="reason"
+          maxlength="500"
+          autocomplete="off"
+          aria-label="Күшін жою себебі"
+          [placeholder]="
+            doc.status === 'POSTED'
+              ? 'Күшін жою себебі (міндетті)'
+              : 'Күшін жою себебі (міндетті емес)'
+          "
+        />
+        <button
+          class="btn btn-danger"
+          type="button"
+          [disabled]="cancelBusy.active()"
+          (click)="cancel()"
+        >
+          Күшін жою
+        </button>
+      </div>
+    }
+    @if (message(); as messages) {
+      <app-alert-box [messages]="messages" />
+    }
+  </section>
+} @else {
+  <p class="muted">Жүктелуде…</p>
+}

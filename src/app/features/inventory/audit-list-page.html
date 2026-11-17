@@ -1,0 +1,47 @@
+<div class="stack">
+  <app-start-audit-card />
+  <section class="card stack">
+    <h2>Түгендеулер</h2>
+    @if (errors(); as messages) {
+      <app-alert-box [messages]="messages" />
+    } @else if (audits(); as list) {
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Нөмірі</th>
+              <th>Күні</th>
+              <th>Қойма</th>
+              <th>Мәртебесі</th>
+              <th class="num">Саналды</th>
+              <th>Жауапты</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (audit of list; track audit.id) {
+              <tr
+                class="clickable"
+                tabindex="0"
+                (click)="open(audit)"
+                (keydown.enter)="open(audit)"
+              >
+                <td>{{ audit.number }}</td>
+                <td>{{ audit.date | dateTime }}</td>
+                <td>{{ audit.warehouse }}</td>
+                <td><app-status-badge [status]="audit.status" /></td>
+                <td class="num">{{ audit.progress.counted }} / {{ audit.progress.total }}</td>
+                <td>{{ audit.responsible }}</td>
+              </tr>
+            } @empty {
+              <tr>
+                <td class="empty" colspan="6">Деректер жоқ</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    } @else {
+      <p class="muted">Жүктелуде…</p>
+    }
+  </section>
+</div>

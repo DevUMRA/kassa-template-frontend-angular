@@ -1,0 +1,157 @@
+@if (loadErrors(); as errors) {
+  <app-alert-box [messages]="errors" />
+} @else if (audit(); as audit) {
+  <section class="card stack">
+    <div class="row">
+      <a class="btn-link" routerLink="/inventory">← Тізім</a>
+      <h2 class="title-inline">Түгендеу №{{ audit.number }}</h2>
+      <app-status-badge [status]="audit.status" />
+      <span class="muted"
+        >{{ audit.warehouse }} · {{ audit.date | dateTime }} · {{ audit.responsible }}</span
+      >
+    </div>
+    @if (audit.comment && !(editable() && isManager())) {
+      <p><span class="muted">Себебі: </span>{{ audit.comment }}</p>
+    }
+    @if (canceledInfo(); as info) {
+      <app-alert-box kind="info" [messages]="info" />
+    }
+    @if (editable()) {
+      <div class="row">
+        <input
+          #scan
+          class="scan grow"
+          placeholder="Штрихкодты сканерлеңіз (+1 немесе көрсетілген сан)"
+          autocomplete="off"
+          aria-label="Штрихкод"
+          (keydown.enter)="scanBarcode(scan)"
+        />
+        <label
+          >Қадам
+          <input
+            class="qty"
+            type="number"
+            min="0"
+            step="any"
+            [formControl]="step"
+            aria-label="Әр сканерлеуге қосылатын сан"
+          />
+        </label>
+      </div>
+    }
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Тауар</th>
+            <th class="num">Есептік</th>
+            <th class="num">Нақты</th>
+            <th class="num">Айырма</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of rows(); track row.item.product_id) {
+            <tr [class.diff-row]="!!row.difference">
+              <td>
+                {{ row.item.product_name }}
+                <div class="muted">{{ row.item.barcode || row.item.sku }}</div>
+              </td>
+              <td class="num">
+                {{ row.item.expected_quantity === null ? '—' : (row.item.expected_quantity | qty) }}
+              </td>
+              <td class="num">
+                <input
+                  #countInput
+                  class="qty"
+                  type="number"
+                  min="0"
+                  step="any"
+                  placeholder="—"
+                  [attr.data-product-id]="row.item.product_id"
+                  [value]="row.value"
+                  [disabled]="!editable()"
+                  [attr.aria-label]="row.item.product_name + ' нақты саны'"
+                  (input)="typeCount(row.item, countInput.value)"
+                  (change)="commitCounts()"
+                />
+              </td>
+              <td [class]="row.differenceClass">{{ row.differenceText }}</td>
+            </tr>
+          } @empty {
+            <tr>
+              <td class="empty" colspan="4">Деректер жоқ</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    @if (editable() && isManager()) {
+      <div class="row">
+        <label class="grow"
+          >Түсініктеме
+          <input
+            [formControl]="comment"
+            maxlength="500"
+            placeholder="Айырманың түсіндірмесі"
+            autocomplete="off"
+          />
+        </label>
+      </div>
+    }
+    <div class="row">
+      <div class="muted">{{ summary() }}</div>
+      <span class="spacer"></span>
+      @if (editable()) {
+        <button
+          class="btn btn-primary"
+          type="button"
+          [disabled]="!hasChanges() || saveBusy.active()"
+          (click)="saveCounts()"
+        >
+          Сақтау
+        </button>
+      }
+      @if (editable() && isManager()) {
+        <button
+          class="btn btn-primary"
+          type="button"
+          [disabled]="approveBusy.active()"
+          (click)="approve()"
+        >
+          Бекіту
+        </button>
+      }
+    </div>
+    @if (audit.status !== 'CANCELED' && isManager()) {
+      <div class="row">
+        <input
+          #cancelReasonInput
+          class="grow"
+          [formControl]="cancelReason"
+          maxlength="500"
+          autocomplete="off"
+          aria-label="Күшін жою себебі"
+          [placeholder]="
+            posted() ? 'Күшін жою себебі (міндетті)' : 'Күшін жою себебі (міндетті емес)'
+          "
+        />
+        <button
+          class="btn btn-danger"
+          type="button"
+          [disabled]="cancelBusy.active()"
+          (click)="cancel()"
+        >
+          Күшін жою
+        </button>
+      </div>
+    }
+    @if (editable() && !isManager()) {
+      <p class="muted">Санауды аяқтаған соң Басқарушы бекітеді.</p>
+    }
+    @if (message(); as messages) {
+      <app-alert-box [messages]="messages" />
+    }
+  </section>
+} @else {
+  <p class="muted">Жүктелуде…</p>
+}
