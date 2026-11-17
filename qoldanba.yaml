@@ -1,0 +1,19 @@
+# Qoldanba песочница манифесі (v1). Сипаттамасы: TEMPLATE.md, 3-бөлім және 7-бөлім.
+# Frontend (SPA): дерекқор жоқ, сондықтан `database` бөлімі болмайды.
+# Платформа әрқашан береді: PORT.
+version: 1
+
+stack: angular
+
+app:
+  port: 8080
+  # nginx жауабы: 200 ok (аутентификациясыз, HTTPS-ке бағыттамайды)
+  healthcheck: /health
+  # Бір команда үшін ұсынылатын шектеулер (тек статика береді)
+  resources:
+    memory: 128m
+    cpus: "0.25"
+
+env:
+  # Сол команданың backend компонентінің адресі — контейнер іске қосылғанда /config.js-ке жазылады
+  API_URL: {value: "https://${BACKEND_HOST}"}

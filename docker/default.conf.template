@@ -1,0 +1,45 @@
+# nginx конфигі: PORT және NGINX_LISTEN_IPV6 мәндерін іске қосылғанда envsubst қояды
+# (nginx-unprivileged /etc/nginx/templates; NGINX_LISTEN_IPV6-ты docker-entrypoint.sh жасайды).
+server {
+    listen ${PORT};
+    ${NGINX_LISTEN_IPV6}
+    server_name _;
+    root /usr/share/nginx/html;
+    server_tokens off;
+
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    add_header X-Frame-Options "DENY" always;
+
+    # Healthcheck (Coolify контейнер ішінен шақырады)
+    location = /health {
+        access_log off;
+        default_type text/plain;
+        return 200 "ok";
+    }
+
+    # Іске қосылғанда жасалады — кэштелмейді
+    location = /config.js {
+        add_header Cache-Control "no-store" always;
+        add_header X-Content-Type-Options "nosniff" always;
+        try_files $uri =404;
+    }
+
+    location = /index.html {
+        add_header Cache-Control "no-cache" always;
+        add_header X-Content-Type-Options "nosniff" always;
+        add_header X-Frame-Options "DENY" always;
+    }
+
+    # Хэшті атаулы файлдар (main-ABC123.js) өзгермейді
+    location ~* "-[A-Za-z0-9_]{8,}\.(js|css)$" {
+        add_header Cache-Control "public, max-age=31536000, immutable" always;
+        add_header X-Content-Type-Options "nosniff" always;
+        try_files $uri =404;
+    }
+
+    # SPA routing: белгісіз жол → index.html
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+}
