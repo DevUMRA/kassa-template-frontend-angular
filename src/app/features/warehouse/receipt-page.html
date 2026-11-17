@@ -1,0 +1,63 @@
+<div class="stack">
+  <div class="grid grid-pos">
+    <section class="card stack" [formGroup]="form">
+      <h2>Жеткізушіден қабылдау · {{ warehouseName() }}</h2>
+      <div class="row">
+        <label class="grow"
+          >Жеткізуші
+          <select formControlName="supplier" aria-label="Жеткізуші">
+            @if (suppliers(); as list) {
+              <option value="">— таңдаңыз —</option>
+              @for (supplier of list; track supplier.id) {
+                <option [value]="supplier.id">{{ supplierLabel(supplier) }}</option>
+              }
+            } @else {
+              <option value="">Жүктелуде…</option>
+            }
+          </select>
+        </label>
+        <label class="grow"
+          >Түсініктеме
+          <input
+            formControlName="comment"
+            maxlength="500"
+            placeholder="Мысалы: накладной №17"
+            autocomplete="off"
+          />
+        </label>
+      </div>
+      <app-line-editor [withPrice]="true" />
+    </section>
+    <aside class="card stack">
+      <div class="total">
+        <span>Жиыны</span><span>{{ editor().total() | money }}</span>
+      </div>
+      <button
+        class="btn btn-primary btn-big"
+        type="button"
+        [disabled]="editor().size() === 0 || submitBusy.active()"
+        (click)="submit()"
+      >
+        Қабылдау
+      </button>
+      @if (side(); as s) {
+        @if (s.kind === 'receipt') {
+          <app-receipt-view [document]="s.receipt" title="Қабылдау" />
+        } @else {
+          <app-alert-box [messages]="s.messages" [kind]="s.info ? 'info' : 'error'" />
+        }
+      }
+    </aside>
+  </div>
+  <section class="card stack">
+    <h2>Соңғы қабылдаулар</h2>
+    <p class="muted">Жеткізушіге қайтару үшін қабылдауды басыңыз.</p>
+    <app-recent-documents
+      #recent
+      path="/warehouse/receipts/"
+      [columns]="recentColumns"
+      [clickable]="true"
+      (opened)="openReturn($event)"
+    />
+  </section>
+</div>

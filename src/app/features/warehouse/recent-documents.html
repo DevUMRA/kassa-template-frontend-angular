@@ -1,0 +1,43 @@
+@if (errors(); as messages) {
+  <app-alert-box [messages]="messages" />
+} @else if (documents(); as list) {
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Нөмірі</th>
+          <th>Күні</th>
+          @for (column of columns(); track column.title) {
+            <th>{{ column.title }}</th>
+          }
+          <th>Мәртебесі</th>
+          <th class="num">Сомасы</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (doc of list; track doc.id) {
+          <tr
+            [class.clickable]="clickable()"
+            [attr.tabindex]="clickable() ? 0 : null"
+            (click)="open(doc)"
+            (keydown.enter)="open(doc)"
+          >
+            <td>{{ doc.number }}</td>
+            <td>{{ doc.posted_at || doc.date | dateTime }}</td>
+            @for (column of columns(); track column.title) {
+              <td>{{ column.value(doc) }}</td>
+            }
+            <td><app-status-badge [status]="doc.status" /></td>
+            <td class="num">{{ doc.total | money }}</td>
+          </tr>
+        } @empty {
+          <tr>
+            <td class="empty" [attr.colspan]="columns().length + 4">Деректер жоқ</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+} @else {
+  <p class="muted">Жүктелуде…</p>
+}

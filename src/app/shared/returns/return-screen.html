@@ -1,0 +1,106 @@
+<section class="card stack">
+  <h2>{{ config().title }}</h2>
+  <div class="row">
+    <input
+      #numberInput
+      class="scan grow"
+      [formControl]="number"
+      [placeholder]="config().placeholder"
+      autocomplete="off"
+      [attr.aria-label]="config().docLabel + ' нөмірі'"
+      (keydown.enter)="find()"
+    />
+    <button class="btn btn-primary" type="button" [disabled]="findBusy.active()" (click)="find()">
+      Табу
+    </button>
+  </div>
+  <div class="stack">
+    @if (findErrors(); as errors) {
+      <app-alert-box [messages]="errors" />
+    }
+    @if (document(); as doc) {
+      <div class="row">
+        <strong>{{ config().docLabel }} №{{ doc.number }}</strong>
+        <app-status-badge [status]="doc.status" />
+        <span class="muted">{{ info() }}</span>
+      </div>
+      @if (doc.status !== 'POSTED') {
+        <app-alert-box
+          kind="info"
+          messages="Өткізілмеген немесе күші жойылған құжаттан қайтаруға болмайды."
+        />
+      }
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Тауар</th>
+              <th class="num">Бағасы</th>
+              <th class="num">{{ config().soldTitle }}</th>
+              <th class="num">Қайтаруға болады</th>
+              <th class="num">Қайтару</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of rows(); track row.item) {
+              <tr>
+                <td>{{ row.item.product_name }}</td>
+                <td class="num">{{ row.item.price | money }}</td>
+                <td class="num">{{ row.item.quantity | qty }}</td>
+                <td class="num">{{ row.left | qty }}</td>
+                <td class="num">
+                  <input
+                    #quantity
+                    class="qty"
+                    type="number"
+                    min="0"
+                    [attr.max]="row.left"
+                    step="any"
+                    value="0"
+                    [disabled]="row.left <= 0"
+                    [attr.aria-label]="row.item.product_name + ' қайтару саны'"
+                    (input)="setQuantity(row.item.product_id, quantity.value)"
+                  />
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td class="empty" colspan="5">Деректер жоқ</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      @if (doc.status === 'POSTED') {
+        <div class="row">
+          <label class="grow"
+            >Қайтару себебі
+            <input
+              [formControl]="reason"
+              maxlength="500"
+              placeholder="Мысалы: ақаулы, сәйкес келмеді"
+              autocomplete="off"
+            />
+          </label>
+          <button
+            class="btn btn-primary"
+            type="button"
+            [disabled]="returnBusy.active()"
+            (click)="submitReturn()"
+          >
+            Қайтаруды өткізу
+          </button>
+        </div>
+      }
+      @if (message(); as messages) {
+        <app-alert-box [messages]="messages" />
+      }
+      @if (doc.returns.length) {
+        <div class="muted">Бұрынғы қайтарулар: {{ previousReturns() }}</div>
+      }
+      @if (lastReturn(); as result) {
+        <app-receipt-view [document]="result" title="Қайтару" />
+      }
+    }
+  </div>
+</section>

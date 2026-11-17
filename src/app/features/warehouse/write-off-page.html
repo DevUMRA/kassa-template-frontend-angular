@@ -1,0 +1,37 @@
+<div class="stack">
+  <section class="card stack">
+    <h2>Есептен шығару · {{ warehouseName() }}</h2>
+    <app-line-editor />
+    <div class="row">
+      <label class="grow"
+        >Себебі (міндетті)
+        <input
+          #reasonInput
+          [formControl]="reason"
+          maxlength="500"
+          required
+          placeholder="Мысалы: бүлінген, мерзімі өткен"
+          autocomplete="off"
+        />
+      </label>
+      <button
+        class="btn btn-primary"
+        type="button"
+        [disabled]="editor().size() === 0 || submitBusy.active()"
+        (click)="submit(reasonInput)"
+      >
+        Есептен шығару
+      </button>
+    </div>
+    @if (errors(); as messages) {
+      <app-alert-box [messages]="messages" />
+    }
+    @if (result(); as writeOff) {
+      <app-receipt-view [document]="writeOff" title="Есептен шығару" />
+    }
+  </section>
+  <section class="card stack">
+    <h2>Соңғы есептен шығарулар</h2>
+    <app-recent-documents #recent path="/warehouse/write-offs/" [columns]="recentColumns" />
+  </section>
+</div>

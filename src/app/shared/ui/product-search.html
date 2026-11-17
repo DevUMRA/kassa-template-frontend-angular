@@ -1,0 +1,51 @@
+<div class="row">
+  <input
+    class="grow"
+    [formControl]="term"
+    [placeholder]="placeholder()"
+    autocomplete="off"
+    aria-label="Тауар іздеу"
+  />
+</div>
+@if (results(); as products) {
+  <div class="search-results">
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Тауар</th>
+            <th>Штрихкод</th>
+            @if (showPrice()) {
+              <th class="num">Бағасы</th>
+            }
+            <th class="num">Қалдық</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (product of products; track product.id) {
+            <tr
+              class="clickable"
+              tabindex="0"
+              (click)="select(product)"
+              (keydown.enter)="select(product)"
+            >
+              <td>{{ product.name }}</td>
+              <td>{{ product.barcode || '—' }}</td>
+              @if (showPrice()) {
+                <td class="num">{{ product.sale_price | money }}</td>
+              }
+              <td class="num">{{ product.available | qty }}</td>
+            </tr>
+          } @empty {
+            <tr>
+              <td class="empty" [attr.colspan]="showPrice() ? 4 : 3">Деректер жоқ</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+}
+@if (errors(); as messages) {
+  <app-alert-box [messages]="messages" />
+}

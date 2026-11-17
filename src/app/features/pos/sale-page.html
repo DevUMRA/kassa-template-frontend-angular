@@ -1,0 +1,85 @@
+<div class="grid grid-pos">
+  <section class="card stack">
+    <h2>Чек</h2>
+    <app-product-scan (found)="add($event)" />
+    <app-product-search [showPrice]="true" (selected)="addFromSearch($event)" />
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Тауар</th>
+            <th class="num">Бағасы</th>
+            <th class="num">Саны</th>
+            <th class="num">Сомасы</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (line of cart(); track line.product.id) {
+            <tr>
+              <td>
+                {{ line.product.name }}
+                @if (isShort(line)) {
+                  <div class="neg">Қалдық: {{ line.product.available | qty }}</div>
+                }
+              </td>
+              <td class="num">{{ line.product.sale_price | money }}</td>
+              <td class="num">
+                <input
+                  #quantity
+                  class="qty"
+                  type="number"
+                  min="0.001"
+                  step="any"
+                  [value]="line.quantity"
+                  [attr.aria-label]="line.product.name + ' саны'"
+                  (change)="changeQuantity(line, quantity)"
+                />
+              </td>
+              <td class="num">{{ +line.product.sale_price * line.quantity | money }}</td>
+              <td>
+                <button
+                  class="btn-icon"
+                  type="button"
+                  title="Жою"
+                  [attr.aria-label]="line.product.name + ' жою'"
+                  (click)="remove(line)"
+                >
+                  ✕
+                </button>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td class="empty" colspan="5">Деректер жоқ</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+  <aside class="card">
+    <div class="stack">
+      <div class="total">
+        <span>Жиыны</span><span>{{ total() | money }}</span>
+      </div>
+      <button
+        class="btn btn-primary btn-big"
+        type="button"
+        [disabled]="cart().length === 0 || sellBusy.active()"
+        (click)="sell()"
+      >
+        Сату
+      </button>
+      <button class="btn" type="button" [disabled]="cart().length === 0" (click)="clear()">
+        Тазалау
+      </button>
+      @if (lastReceipt(); as receipt) {
+        <app-receipt-view [document]="receipt" title="Чек" />
+      }
+      @if (errors(); as messages) {
+        <app-alert-box [messages]="messages" />
+      }
+    </div>
+  </aside>
+</div>

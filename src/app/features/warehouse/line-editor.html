@@ -1,0 +1,76 @@
+<div class="stack">
+  <app-product-scan (found)="add($event)" />
+  <app-product-search (selected)="addFromSearch($event)" />
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Тауар</th>
+          <th class="num">Саны</th>
+          @if (withPrice()) {
+            <th class="num">Бағасы</th>
+            <th class="num">Сомасы</th>
+          }
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (line of lines(); track line.product.id) {
+          <tr>
+            <td>
+              {{ line.product.name }}
+              <div [class]="isShort(line) ? 'neg' : 'muted'">
+                Қалдық: {{ line.product.available | qty }}
+              </div>
+            </td>
+            <td class="num">
+              <input
+                #quantity
+                class="qty"
+                type="number"
+                min="0.001"
+                step="any"
+                [value]="line.quantity"
+                [attr.aria-label]="line.product.name + ' саны'"
+                (change)="changeQuantity(line, quantity)"
+              />
+            </td>
+            @if (withPrice()) {
+              <td class="num">
+                <input
+                  #price
+                  class="qty"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  placeholder="0.00"
+                  [value]="line.price"
+                  [attr.aria-label]="line.product.name + ' бағасы'"
+                  (change)="changePrice(line, price)"
+                />
+              </td>
+              <td class="num">
+                {{ line.price === '' ? '—' : (+line.price * line.quantity | money) }}
+              </td>
+            }
+            <td>
+              <button
+                class="btn-icon"
+                type="button"
+                title="Жою"
+                [attr.aria-label]="line.product.name + ' жою'"
+                (click)="remove(line)"
+              >
+                ✕
+              </button>
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td class="empty" [attr.colspan]="withPrice() ? 5 : 3">Деректер жоқ</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>
