@@ -1,0 +1,23 @@
+<header class="topbar">
+  <div class="brand">Дүкен</div>
+  <nav class="tabs" aria-label="Бөлімдер">
+    @for (key of sections(); track key) {
+      <a class="tab" role="tab" [routerLink]="['/', key]" [attr.aria-selected]="key === active()">
+        {{ titles[key] }}
+      </a>
+    }
+  </nav>
+  <div class="user">
+    <span class="muted">{{ userInfo() }}</span>
+    <button class="btn btn-link" type="button" (click)="logout()">Шығу</button>
+  </div>
+</header>
+<main class="view">
+  @if (auth.loadError(); as errors) {
+    <app-alert-box [messages]="errors" />
+  } @else if (warehouseMissing()) {
+    <app-alert-box kind="info" messages="Сізге қойма бекітілмеген. Әкімшіге хабарласыңыз." />
+  } @else {
+    <router-outlet />
+  }
+</main>

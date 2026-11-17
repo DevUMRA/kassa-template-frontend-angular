@@ -1,0 +1,30 @@
+<main class="login">
+  <form class="card login-card" [formGroup]="form" (ngSubmit)="logIn()">
+    <h1>Дүкен</h1>
+    <p class="muted">Касса, түгендеу және есептер</p>
+    @if (errors(); as messages) {
+      <app-alert-box [messages]="messages" />
+    }
+    <label
+      >Логин
+      <input
+        #username
+        formControlName="username"
+        name="username"
+        autocomplete="username"
+        required
+      />
+    </label>
+    <label
+      >Құпия сөз
+      <input
+        formControlName="password"
+        name="password"
+        type="password"
+        autocomplete="current-password"
+        required
+      />
+    </label>
+    <button class="btn btn-primary" type="submit" [disabled]="submitting()">Кіру</button>
+  </form>
+</main>
